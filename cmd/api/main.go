@@ -8,9 +8,16 @@ import (
 )
 
 func main() {
-	bookUsecase := usecase.NewBookUsecase()
-	bookHandler := handler.NewBookHandler(bookUsecase)
+	r := initializeServer()
+	r.Run()
+}
+
+func newServer(
+	bookHandler handler.BookHandler,
+	bookUsecase usecase.BookUsecase,
+) *gin.Engine {
 	r := gin.Default()
 	r.GET("/v1/book/:id", bookHandler.GetBook)
-	r.Run()
+
+	return r
 }
