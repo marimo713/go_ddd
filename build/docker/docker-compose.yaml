@@ -1,0 +1,30 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - 8080:8080
+      - 5002:5002
+      - 2345:2345
+    security_opt:
+      - apparmor:unconfined
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ./../../:/go/src/app
+    environment:
+      - ENV=develop
+  db:
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: gin_base
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: hogehoge
+      TZ: Asia/Tokyo
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci

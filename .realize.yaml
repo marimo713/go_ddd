@@ -1,0 +1,36 @@
+settings:
+  legacy:
+    force: false
+    interval: 0s
+server:
+  status: true
+  open: false
+  port: 5002
+  host: localhost
+schema:
+  - name: api
+    path: .
+    commands:
+      build:
+        status: true
+        method: make build #go build -o cmd/api/main cmd/api/main.go #cmd/api/wire_gen.go
+      run:
+        status: true
+        method: ./cmd/api/main
+
+    watcher:
+      paths:
+        - /
+      ignored_paths:
+        - cmd/api/wire_gen.go
+        - .git
+        - .realize
+        - vendor
+      extensions:
+        - go
+        - html
+        - toml
+      scripts:
+        - type: before
+          command: ./scripts/build.sh
+          output: false
