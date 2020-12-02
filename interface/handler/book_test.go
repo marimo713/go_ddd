@@ -3,24 +3,34 @@ package handler
 import (
 	"io"
 	"log"
+	entity_book "my-app/domain/entity/book"
+	usecase_mock "my-app/utils/mockgen"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupBookRouter(handler BookHandler) *gin.Engine {
+func setupBookRouter(t *testing.T) (*gin.Engine, *usecase_mock.MockBookUsecase, func()) {
+	ctrl := gomock.NewController(t)
+	bu := usecase_mock.NewMockBookUsecase(ctrl)
+
+	handler := NewBookHandler(bu)
 	r := gin.Default()
 	r.GET("/v1/books/:id", handler.GetBook)
 
-	return r
+	return r, bu, ctrl.Finish
 }
 
 func TestBook_GetBook_ResponseBook(t *testing.T) {
-	handler := NewBookHandler()
-	r := setupBookRouter(handler)
+	r, bu, cleanup := setupBookRouter(t)
+	defer cleanup()
+
+	seed := entity_book.NewBook(123, "978-4798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	bu.EXPECT().GetBook(uint64(123)).Return(seed)
 
 	res := callAPI(r, "GET", "/v1/books/123", nil)
 

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	entity_book "my-app/domain/entity/book"
 	"my-app/interface/response"
+	"my-app/usecase"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +13,13 @@ type BookHandler interface {
 }
 
 type bookHandler struct {
+	bookUsecase usecase.BookUsecase
 }
 
-func NewBookHandler() BookHandler {
-	return bookHandler{}
+func NewBookHandler(bookUsecase usecase.BookUsecase) BookHandler {
+	return bookHandler{
+		bookUsecase: bookUsecase,
+	}
 }
 
 func (handler bookHandler) GetBook(c *gin.Context) {
@@ -26,7 +29,7 @@ func (handler bookHandler) GetBook(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	book := entity_book.NewBook(id, "978-4798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	book := handler.bookUsecase.GetBook(id)
 
 	c.JSON(200, response.NewBookFromDomain(book))
 }

@@ -2,13 +2,15 @@ package main
 
 import (
 	"my-app/interface/handler"
+	"my-app/usecase"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	bookHandler := handler.NewBookHandler()
+	bookUsecase := usecase.NewBookUsecase()
+	bookHandler := handler.NewBookHandler(bookUsecase)
 	r := gin.Default()
 	r.GET("/v1/book/:id", bookHandler.GetBook)
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run()
 }
