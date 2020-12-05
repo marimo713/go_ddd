@@ -9,7 +9,7 @@ import (
 )
 
 type BookHandler interface {
-	GetBook(c *gin.Context)
+	GetByID(c *gin.Context)
 }
 
 type bookHandler struct {
@@ -22,14 +22,18 @@ func NewBookHandler(bookUsecase usecase.BookUsecase) BookHandler {
 	}
 }
 
-func (handler bookHandler) GetBook(c *gin.Context) {
+func (handler bookHandler) GetByID(c *gin.Context) {
 	strID := c.Param("id")
 	id, err := strconv.ParseUint(strID, 10, 64)
 	if err != nil {
 		c.Abort()
 		return
 	}
-	book := handler.bookUsecase.GetBook(id)
+	book, err := handler.bookUsecase.GetByID(id)
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
-	c.JSON(200, response.NewBookFromDomain(book))
+	c.JSON(200, response.NewBookFromDomain(*book))
 }

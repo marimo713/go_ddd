@@ -1,20 +1,26 @@
-//go:generate mockgen -source=$GOFILE -destination=../utils/mockgen/mock_$GOFILE -package=$GOPACKAGE
+//go:generate mockgen -source=$GOFILE -destination=../utils/mockgen/$GOPACKAGE/mock_$GOFILE -package=$GOPACKAGE
 package usecase
 
-import entity_book "my-app/domain/entity/book"
+import (
+	entity_book "my-app/domain/entity/book"
+	"my-app/domain/repository"
+)
 
 type BookUsecase interface {
-	GetBook(uint64) entity_book.Book
+	GetByID(uint64) (*entity_book.Book, error)
 }
 
 type bookUsecase struct {
+	bookRepository repository.BookRepository
 }
 
-func NewBookUsecase() BookUsecase {
-	return bookUsecase{}
+func NewBookUsecase(bookRepository repository.BookRepository) BookUsecase {
+	return bookUsecase{
+		bookRepository: bookRepository,
+	}
 }
 
-func (usecase bookUsecase) GetBook(id uint64) entity_book.Book {
+func (usecase bookUsecase) GetByID(id uint64) (*entity_book.Book, error) {
 
-	return entity_book.NewBook(123, "978-4798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	return usecase.bookRepository.GetByID(id)
 }

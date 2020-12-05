@@ -30,7 +30,3 @@ schema:
         - go
         - html
         - toml
-      scripts:
-        - type: before
-          command: ./scripts/build.sh
-          output: false

@@ -1,7 +1,10 @@
 // +build wireinject
+
 package main
 
 import (
+	"my-app/config"
+	"my-app/infrastructure/mysql"
 	"my-app/interface/handler"
 	"my-app/usecase"
 
@@ -9,11 +12,14 @@ import (
 	"github.com/google/wire"
 )
 
-func initializeServer() *gin.Engine {
+func initializeServer(conf config.Config) (*gin.Engine, func(), error) {
 	wire.Build(
 		handler.NewBookHandler,
 		usecase.NewBookUsecase,
+		mysql.NewBookRepository,
+		mysql.Open,
+		wire.FieldsOf(&conf, "DB"),
 		newServer,
 	)
-	return nil
+	return nil, nil, nil
 }

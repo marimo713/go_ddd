@@ -1,23 +1,35 @@
 package main
 
 import (
+	"log"
+	"my-app/config"
 	"my-app/interface/handler"
-	"my-app/usecase"
+	"my-app/interface/middleware"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	r := initializeServer()
+	config, err := config.NewConfig("./config/env/", "develop")
+	if err != nil {
+		log.Fatal(err)
+	}
+	r, cleanup, err := initializeServer(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cleanup()
+
 	r.Run()
 }
 
 func newServer(
 	bookHandler handler.BookHandler,
-	bookUsecase usecase.BookUsecase,
 ) *gin.Engine {
 	r := gin.Default()
-	r.GET("/v1/book/:id", bookHandler.GetBook)
+	r.Use(middleware.ErrorMiddleware())
+	r.GET("/v1/book/:id", bookHandler.GetByID)
 
 	return r
 }
