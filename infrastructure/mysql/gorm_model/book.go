@@ -12,7 +12,7 @@ type Book struct {
 }
 
 func (book Book) ToDomain() entity_book.Book {
-	return entity_book.NewBook(
+	return entity_book.NewBookForRebuild(
 		book.ID,
 		book.Isbn,
 		book.Title,

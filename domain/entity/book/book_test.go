@@ -14,7 +14,22 @@ var seedBook = Book{
 }
 
 func TestNewBook_ReturnsBookEntity(t *testing.T) {
+	expect := Book{
+		isbn:   "9784798121963",
+		title:  "seed_title",
+		author: "seed_author",
+	}
 	actual := NewBook(
+		expect.isbn,
+		expect.title,
+		expect.author,
+	)
+
+	assert.Equal(t, expect, actual)
+}
+
+func TestNewBookForRebuild_ReturnsBookEntity(t *testing.T) {
+	actual := NewBookForRebuild(
 		seedBook.id,
 		seedBook.isbn,
 		seedBook.title,

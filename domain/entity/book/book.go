@@ -7,7 +7,15 @@ type Book struct {
 	author string
 }
 
-func NewBook(id uint64, isbn string, title string, author string) Book {
+func NewBook(isbn string, title string, author string) Book {
+	return Book{
+		isbn:   isbn,
+		title:  title,
+		author: author,
+	}
+}
+
+func NewBookForRebuild(id uint64, isbn string, title string, author string) Book {
 	return Book{
 		id:     id,
 		isbn:   isbn,

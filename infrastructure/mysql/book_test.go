@@ -37,7 +37,7 @@ func OpenTestDB() (Database, sqlmock.Sqlmock, func()) {
 }
 
 func TestBook_GetByID_ReturnBook(t *testing.T) {
-	seed := entity_book.NewBook(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()
@@ -57,7 +57,7 @@ func TestBook_GetByID_ReturnBook(t *testing.T) {
 }
 
 func TestBook_GetByID_ReturnNotFoundErrorWhenDBError(t *testing.T) {
-	seed := entity_book.NewBook(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()
@@ -76,7 +76,7 @@ func TestBook_GetByID_ReturnNotFoundErrorWhenDBError(t *testing.T) {
 }
 
 func TestBook_GetByID_ReturnErrorWhenDataNotFound(t *testing.T) {
-	seed := entity_book.NewBook(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()

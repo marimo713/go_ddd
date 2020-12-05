@@ -22,7 +22,7 @@ func TestBook_GetByID_ReturnsBook(t *testing.T) {
 	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
 	defer cleanup()
 
-	expect := entity_book.NewBook(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	expect := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
 	mBookRepository.EXPECT().GetByID(expect.ID()).Return(&expect, nil)
 
 	book, err := usecase.GetByID(expect.ID())

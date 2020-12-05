@@ -29,7 +29,7 @@ func TestBook_GetByID_ReturnsBook(t *testing.T) {
 	r, bu, cleanup := setupBookRouter(t)
 	defer cleanup()
 
-	seed := entity_book.NewBook(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
 	bu.EXPECT().GetByID(seed.ID()).Return(&seed, nil)
 
 	res := test_util.CallAPI(r, "GET", "/v1/books/123", nil)
