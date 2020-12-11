@@ -34,3 +34,21 @@ func (repo bookRepository) GetByID(id uint64) (*entity_book.Book, error) {
 	}
 	return domain, nil
 }
+
+func (repo bookRepository) GetAll() ([]entity_book.Book, error) {
+	var books []gorm_model.Book
+	err := repo.db.Find(&books).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var domainBooks []entity_book.Book
+	for i := range books {
+		domainBook, err := books[i].ToDomain()
+		if err != nil {
+			return nil, err
+		}
+		domainBooks = append(domainBooks, *domainBook)
+	}
+	return domainBooks, nil
+}

@@ -5,4 +5,5 @@ import entity_book "my-app/domain/entity/book"
 
 type BookRepository interface {
 	GetByID(uint64) (*entity_book.Book, error)
+	GetAll() ([]entity_book.Book, error)
 }
