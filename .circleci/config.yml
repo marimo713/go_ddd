@@ -23,6 +23,7 @@ jobs:
       - checkout
       # specify any bash command here prefixed with `run: `
       - run: GO111MODULE=on go get github.com/golang/mock/mockgen@v1.4.4
+      - run: go get github.com/google/wire/cmd/wire
       - run: make generate
       - run: make wire
       - run: go get -v -t -d ./...
