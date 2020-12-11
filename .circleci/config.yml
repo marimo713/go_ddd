@@ -26,3 +26,8 @@ jobs:
       - run: make generate
       - run: go get -v -t -d ./...
       - run: go test -v ./...
+workflows:
+  version: 2
+  main:
+    jobs:
+      - test:
