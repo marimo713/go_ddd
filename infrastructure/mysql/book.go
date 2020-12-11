@@ -28,6 +28,9 @@ func (repo bookRepository) GetByID(id uint64) (*entity_book.Book, error) {
 		}
 		return nil, err
 	}
-	domain := book.ToDomain()
-	return &domain, nil
+	domain, err := book.ToDomain()
+	if err != nil {
+		return nil, err
+	}
+	return domain, nil
 }

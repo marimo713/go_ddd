@@ -26,6 +26,9 @@ func OpenTestDB() (Database, sqlmock.Sqlmock, func()) {
 	}
 
 	cleanup := func() {
+		if err := mock.ExpectationsWereMet(); err != nil {
+			log.Fatalf("there were unfulfilled expectations: %s", err)
+		}
 		if err := gdb.Close(); err != nil {
 			log.Print(err)
 		}
@@ -37,7 +40,10 @@ func OpenTestDB() (Database, sqlmock.Sqlmock, func()) {
 }
 
 func TestBook_GetByID_ReturnBook(t *testing.T) {
-	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()
@@ -53,11 +59,18 @@ func TestBook_GetByID_ReturnBook(t *testing.T) {
 	actual, err := br.GetByID(123)
 
 	assert.NoError(t, err)
-	assert.Equal(t, seed, *actual)
+	assert.Equal(t, seed, actual)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		log.Fatalf("there were unfulfilled expectations: %s", err)
+	}
 }
 
 func TestBook_GetByID_ReturnNotFoundErrorWhenDBError(t *testing.T) {
-	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()
@@ -73,10 +86,17 @@ func TestBook_GetByID_ReturnNotFoundErrorWhenDBError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, actual)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		log.Fatalf("there were unfulfilled expectations: %s", err)
+	}
 }
 
 func TestBook_GetByID_ReturnErrorWhenDataNotFound(t *testing.T) {
-	seed := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	db, mock, cleanup := OpenTestDB()
 	defer cleanup()
@@ -91,5 +111,32 @@ func TestBook_GetByID_ReturnErrorWhenDataNotFound(t *testing.T) {
 	actual, err := br.GetByID(123)
 
 	assert.IsType(t, myerror.NotFoundError{}, err)
+	assert.Nil(t, actual)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		log.Fatalf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestBook_GetByID_ReturnErrorWhenToDomainFailed(t *testing.T) {
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	query := "SELECT * FROM `books`  WHERE (`books`.`id` = " +
+		strconv.FormatUint(seed.ID(), 10) +
+		") ORDER BY `books`.`id` ASC LIMIT 1"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "isbn", "title", "author"}).
+			AddRow(seed.ID(), "invalid_isbn", seed.Title(), seed.Author()))
+
+	br := NewBookRepository(db)
+	actual, err := br.GetByID(123)
+
+	assert.Error(t, err)
 	assert.Nil(t, actual)
 }

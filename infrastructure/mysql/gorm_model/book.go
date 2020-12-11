@@ -11,7 +11,7 @@ type Book struct {
 	Author string `gorm:"type:varchar(255)"`
 }
 
-func (book Book) ToDomain() entity_book.Book {
+func (book Book) ToDomain() (*entity_book.Book, error) {
 	return entity_book.NewBookForRebuild(
 		book.ID,
 		book.Isbn,
