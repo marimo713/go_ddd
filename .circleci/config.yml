@@ -4,7 +4,7 @@
 version: 2.1
 
 jobs:
-  test:
+  build:
     docker:
       # specify the version
       - image: circleci/golang:1.9
@@ -27,9 +27,3 @@ jobs:
       - run: make generate
       - run: go get -v -t -d ./...
       - run: go test -v ./...
-
-workflows:
-  version: 2
-  main:
-    jobs:
-      - test:
