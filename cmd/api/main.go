@@ -29,7 +29,8 @@ func newServer(
 ) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.ErrorMiddleware())
-	r.GET("/v1/book/:id", bookHandler.GetByID)
+	r.GET("/v1/books/:id", bookHandler.GetByID)
+	r.GET("/v1/books/", bookHandler.GetAll)
 
 	return r
 }

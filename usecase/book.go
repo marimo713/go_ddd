@@ -8,6 +8,7 @@ import (
 
 type BookUsecase interface {
 	GetByID(uint64) (*entity_book.Book, error)
+	GetAll() ([]entity_book.Book, error)
 }
 
 type bookUsecase struct {
@@ -23,4 +24,9 @@ func NewBookUsecase(bookRepository repository.BookRepository) BookUsecase {
 func (usecase bookUsecase) GetByID(id uint64) (*entity_book.Book, error) {
 
 	return usecase.bookRepository.GetByID(id)
+}
+
+func (usecase bookUsecase) GetAll() ([]entity_book.Book, error) {
+
+	return usecase.bookRepository.GetAll()
 }

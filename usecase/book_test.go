@@ -47,3 +47,36 @@ func TestBook_GetByID_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
 	assert.Nil(t, book)
 
 }
+
+func TestBook_GetAll_ReturnsBooks(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	seed1, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+	seed2, err := entity_book.NewBookForRebuild(234, "1234567890123", "実践ドメイン駆動設計", "	ヴァーン・ヴァーノン")
+	if err != nil {
+		log.Fatal(err)
+	}
+	expect := []entity_book.Book{*seed1, *seed2}
+	mBookRepository.EXPECT().GetAll().Return(expect, nil)
+
+	books, err := usecase.GetAll()
+
+	assert.NoError(t, err)
+	assert.Equal(t, expect, books)
+}
+
+func TestBook_GetAll_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	mBookRepository.EXPECT().GetAll().Return(nil, errors.New("repository error"))
+
+	book, err := usecase.GetAll()
+
+	assert.Error(t, err)
+	assert.Nil(t, book)
+}
