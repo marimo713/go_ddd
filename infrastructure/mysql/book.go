@@ -52,3 +52,32 @@ func (repo bookRepository) GetAll() ([]entity_book.Book, error) {
 	}
 	return domainBooks, nil
 }
+
+func (repo bookRepository) Create(book entity_book.Book) (*entity_book.Book, error) {
+	gormBook := gorm_model.NewBookFromDomain(book)
+	result := repo.db.Create(&gormBook)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	return gormBook.ToDomain()
+}
+
+func (repo bookRepository) Update(book entity_book.Book) (*entity_book.Book, error) {
+	gormBook := gorm_model.NewBookFromDomain(book)
+	result := repo.db.Save(&gormBook)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+
+	return gormBook.ToDomain()
+}
+
+func (repo bookRepository) Delete(id uint64) error {
+	result := repo.db.Delete(&gorm_model.Book{}, id)
+	if err := result.Error; err != nil {
+		return err
+	}
+
+	return nil
+}

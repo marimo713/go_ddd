@@ -11,6 +11,15 @@ type Book struct {
 	Author string `gorm:"type:varchar(255)"`
 }
 
+func NewBookFromDomain(book entity_book.Book) Book {
+	return Book{
+		ID:     book.ID(),
+		Isbn:   book.Isbn(),
+		Title:  book.Title(),
+		Author: book.Author(),
+	}
+}
+
 func (book Book) ToDomain() (*entity_book.Book, error) {
 	return entity_book.NewBookForRebuild(
 		book.ID,

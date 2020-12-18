@@ -196,6 +196,140 @@ func TestBook_GetAll_ReturnErrorWhenToDomainFailed(t *testing.T) {
 	assert.Nil(t, actual)
 }
 
+func TestBook_Create_InsertsBook(t *testing.T) {
+	seed, err := entity_book.NewBook("9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newCreateBookSQL()
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WithArgs(seed.Isbn(), seed.Title(), seed.Author()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	br := NewBookRepository(db)
+
+	actual, err := br.Create(*seed)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, actual.ID())
+	assert.Equal(t, seed.Isbn(), actual.Isbn())
+	assert.Equal(t, seed.Title(), actual.Title())
+	assert.Equal(t, seed.Author(), actual.Author())
+}
+
+func TestBook_Create_ReturnsErrorWhenDBReturnsError(t *testing.T) {
+	seed, err := entity_book.NewBook("9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newCreateBookSQL()
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("db error"))
+
+	br := NewBookRepository(db)
+
+	actual, err := br.Create(*seed)
+
+	assert.Error(t, err)
+	assert.Nil(t, actual)
+}
+
+func TestBook_Update_UpdatesBook(t *testing.T) {
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newUpdateBookSQL()
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WithArgs(seed.Isbn(), seed.Title(), seed.Author(), seed.ID()).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	br := NewBookRepository(db)
+
+	actual, err := br.Update(*seed)
+
+	assert.NoError(t, err)
+	assert.Equal(t, seed, actual)
+}
+
+func TestBook_Update_ReturnsErrorWhenDBReturnsError(t *testing.T) {
+	seed, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newUpdateBookSQL()
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(errors.New("db error"))
+
+	br := NewBookRepository(db)
+
+	actual, err := br.Update(*seed)
+
+	assert.Error(t, err)
+	assert.Nil(t, actual)
+}
+
+func TestBook_Delete_DeletesBook(t *testing.T) {
+	targetID := uint64(123)
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newDeleteBookSQL(targetID)
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+
+	br := NewBookRepository(db)
+
+	err := br.Delete(targetID)
+
+	assert.NoError(t, err)
+}
+
+func TestBook_Delete_ReturnsErrorWhenDBReturnsError(t *testing.T) {
+	targetID := uint64(123)
+
+	db, mock, cleanup := OpenTestDB()
+	defer cleanup()
+
+	mock.ExpectBegin()
+	sql := newDeleteBookSQL(targetID)
+	mock.ExpectExec(regexp.QuoteMeta(sql)).
+		WillReturnError(errors.New("db error"))
+
+	br := NewBookRepository(db)
+
+	err := br.Delete(targetID)
+
+	assert.Error(t, err)
+}
+
 func newGetBookByIDQuery(book entity_book.Book) string {
 	return "SELECT * FROM `books`  WHERE (`books`.`id` = " +
 		strconv.FormatUint(book.ID(), 10) +
@@ -204,4 +338,16 @@ func newGetBookByIDQuery(book entity_book.Book) string {
 
 func newGetBookAllQuery() string {
 	return "SELECT * FROM `books`"
+}
+
+func newCreateBookSQL() string {
+	return "INSERT INTO `books` (`isbn`,`title`,`author`) VALUES (?,?,?)"
+}
+
+func newUpdateBookSQL() string {
+	return "UPDATE `books` SET `isbn` = ?, `title` = ?, `author` = ?  WHERE `books`.`id` = ?"
+}
+
+func newDeleteBookSQL(id uint64) string {
+	return "DELETE FROM `books`  WHERE (`books`.`id` = " + strconv.FormatUint(id, 10) + ")"
 }
