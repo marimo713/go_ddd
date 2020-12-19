@@ -9,6 +9,9 @@ import (
 type BookUsecase interface {
 	GetByID(uint64) (*entity_book.Book, error)
 	GetAll() ([]entity_book.Book, error)
+	Create(entity_book.Book) (*entity_book.Book, error)
+	Update(entity_book.Book) (*entity_book.Book, error)
+	Delete(uint64) error
 }
 
 type bookUsecase struct {
@@ -29,4 +32,19 @@ func (usecase bookUsecase) GetByID(id uint64) (*entity_book.Book, error) {
 func (usecase bookUsecase) GetAll() ([]entity_book.Book, error) {
 
 	return usecase.bookRepository.GetAll()
+}
+
+func (usecase bookUsecase) Create(book entity_book.Book) (*entity_book.Book, error) {
+
+	return usecase.bookRepository.Create(book)
+}
+
+func (usecase bookUsecase) Update(book entity_book.Book) (*entity_book.Book, error) {
+
+	return usecase.bookRepository.Update(book)
+}
+
+func (usecase bookUsecase) Delete(id uint64) error {
+
+	return usecase.bookRepository.Delete(id)
 }

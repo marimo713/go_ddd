@@ -19,7 +19,7 @@ func newBookUsecaseWithMock(t *testing.T) (BookUsecase, *repository_mock.MockBoo
 	return usecase, br, ctrl.Finish
 }
 
-func TestBook_GetByID_ReturnsBook(t *testing.T) {
+func TestBook_GetByID_ReturnsBookWhenRepositorySuccess(t *testing.T) {
 	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
 	defer cleanup()
 
@@ -48,7 +48,7 @@ func TestBook_GetByID_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
 
 }
 
-func TestBook_GetAll_ReturnsBooks(t *testing.T) {
+func TestBook_GetAll_ReturnsBooksWhenRepositorySuccess(t *testing.T) {
 	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
 	defer cleanup()
 
@@ -79,4 +79,82 @@ func TestBook_GetAll_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, book)
+}
+
+func TestBook_Create_ReturnsBookWhenRepositorySuccess(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	expect, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+	mBookRepository.EXPECT().Create(*expect).Return(expect, nil)
+
+	book, err := usecase.Create(*expect)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expect, book)
+}
+
+func TestBook_Create_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	mBookRepository.EXPECT().Create(gomock.Any()).Return(nil, errors.New("repository error"))
+
+	book, err := usecase.Create(entity_book.Book{})
+
+	assert.Error(t, err)
+	assert.Nil(t, book)
+}
+
+func TestBook_Update_ReturnsBookWhenRepositorySuccess(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	expect, err := entity_book.NewBookForRebuild(123, "9784798121963", "エリック・エヴァンスのドメイン駆動設計", "エリック・エヴァンス")
+	if err != nil {
+		log.Fatal(err)
+	}
+	mBookRepository.EXPECT().Update(*expect).Return(expect, nil)
+
+	book, err := usecase.Update(*expect)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expect, book)
+}
+
+func TestBook_Update_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	mBookRepository.EXPECT().Update(gomock.Any()).Return(nil, errors.New("repository error"))
+
+	book, err := usecase.Update(entity_book.Book{})
+
+	assert.Error(t, err)
+	assert.Nil(t, book)
+}
+
+func TestBook_Delete_NotReturnErrorWhenRepositorySuccess(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	mBookRepository.EXPECT().Delete(uint64(123)).Return(nil)
+
+	err := usecase.Delete(123)
+
+	assert.NoError(t, err)
+}
+
+func TestBook_Delete_ReturnsErrorWhenRepositoryReturnsError(t *testing.T) {
+	usecase, mBookRepository, cleanup := newBookUsecaseWithMock(t)
+	defer cleanup()
+
+	mBookRepository.EXPECT().Delete(gomock.Any()).Return(errors.New("repository error"))
+
+	err := usecase.Delete(123)
+
+	assert.Error(t, err)
 }
